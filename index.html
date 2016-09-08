@@ -19,41 +19,91 @@
     </section>
 
     <section class="main-content">
-      <h3>
-<a id="check-out-the-explanation-here" class="anchor" href="#check-out-the-explanation-here" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Check out the explanation here.</h3>
+      <blockquote>
+<p>The CSS contain property indicates that the element’s subtree is independent of the rest of the page. This enables heavy optimizations by user agents when used well.</p>
 
-<h3>
-<a id="bad-example" class="anchor" href="#bad-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Bad Example</h3>
+<p>Source: <a href="https://drafts.csswg.org/css-containment/">https://drafts.csswg.org/css-containment/</a></p>
+</blockquote>
 
-<p>This is a bad example.</p>
+<p>With the new CSS Containment Property, Developers can inform the browser about scope of an element's styles, layout and paint, depending on which the browser can optimize its Render Pipeline.</p>
 
-<h3>
-<a id="contain-layout" class="anchor" href="#contain-layout" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: layout;</h3>
+<p>The CSS contain property has landed in Chrome 52 and in Opera 40 and is <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1150081">coming soon to Firefox</a>.</p>
 
-<div class="highlight highlight-source-css"><pre><span class="pl-e">.parent-div</span> {
-  <span class="pl-c1">contain</span>: layout;
-}</pre></div>
+<h2>
+<a id="un-optimized-example" class="anchor" href="#un-optimized-example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Un-optimized Example</h2>
 
-<h3>
-<a id="contain-paint" class="anchor" href="#contain-paint" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: paint;</h3>
+<p>There are three divs: <code>.parent-div</code>, <code>.child-div</code> &amp; <code>.unaffected-div</code>. The <code>.child-div</code> is absolutely positioned and we will be moving it using the <code>left</code> property. This is not as efficient as <code>transform: translateX()</code>, but it helps us in seeing improvement when we apply containment.</p>
 
-<div class="highlight highlight-source-css"><pre><span class="pl-e">.parent-div</span> {
-  <span class="pl-c1">contain</span>: paint;
-}</pre></div>
+<h2>
+<a id="how-to-measure-improvement" class="anchor" href="#how-to-measure-improvement" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to measure improvement</h2>
 
-<h3>
-<a id="contain-size" class="anchor" href="#contain-size" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: size</h3>
+<ol>
+<li>Open Chrome Developer Tools.</li>
+<li>Go to Timeline tab.</li>
+<li>Hit Record ● (or ⌘ + E / Ctrl + E)</li>
+<li>Click Animate Me Button</li>
+<li>Stop Recording and zoom into frame and individual process and see time taken.</li>
+</ol>
 
-<div class="highlight highlight-source-css"><pre><span class="pl-e">.parent-div</span> {
-  <span class="pl-c1">contain</span>: size;
-}</pre></div>
+<h2>
+<a id="contain-layout" class="anchor" href="#contain-layout" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: layout</h2>
 
-<h3>
-<a id="contain-style" class="anchor" href="#contain-style" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: style;</h3>
+<ul>
+<li>With <code>contain:layout</code>, the developer specifies that any changes to any descendant of this element will not affect the layout of any outside element and vice versa. So the browser only computes positions of the internal elements if they are modified and the rest of the DOM stays as is. So this means that Layout process in the animation frame render pipeline which we saw earlier will speed up.</li>
+<li>This gives Highest Performance Benefit amongst all other containment values.</li>
+</ul>
 
-<div class="highlight highlight-source-css"><pre><span class="pl-e">.parent-div</span> {
-  <span class="pl-c1">contain</span>: style;
-}</pre></div>
+<h2>
+<a id="contain-paint" class="anchor" href="#contain-paint" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: paint</h2>
+
+<ul>
+<li>With <code>contain: paint</code>, you specify that no descendant will display outside the elements bounds. Think of it as <code>overflow:hidden</code>.</li>
+<li>Now <code>position: absolute</code> or <code>position: fixed</code> elements are positioned relative to their first non statically positioned ancestor. But if there is a closer ancestor with contain:paint, they will be positioned relative to that element.</li>
+<li>
+<code>z-index</code> property for this element will work even if it is <code>position: static</code>.</li>
+<li>Plus it the element will be pushed to a different layer in the “Paint” process of the animation pipeline.</li>
+</ul>
+
+<h2>
+<a id="contain-size" class="anchor" href="#contain-size" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: size</h2>
+
+<ul>
+<li>
+<code>contain: size</code> means that this component’s size is set and no descendant will modify its size.</li>
+<li>If you don’t specify the size dimensions width &amp; height, the element will be rendered empty i.e. 0 by 0 pixels</li>
+<li>This containment value does not give much performance boost but rather is just an additional level of containment.</li>
+</ul>
+
+<h2>
+<a id="contain-style" class="anchor" href="#contain-style" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: style</h2>
+
+<ul>
+<li>
+<code>contain: style</code> means that any descendant’s styles will not affect outside elements.</li>
+<li>In CSS, i.e. "Cascading Style Sheets" which means properties get trickled down, not the other way round, this property is not that important.</li>
+<li>But one example where it can help is CSS Counters where changes inside won’t get propagated outside.</li>
+<li>Bear in mind that this is in no way associated to scoped styling that you get from Shadow DOM</li>
+</ul>
+
+<h2>
+<a id="contain-strict" class="anchor" href="#contain-strict" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: strict</h2>
+
+<ul>
+<li>Equivalent to <code>contain: layout paint size style</code>
+</li>
+<li>So its a shorthand combination of all four values given above.</li>
+<li>Highest Containment Optimization if dimensions are set.</li>
+</ul>
+
+<h2>
+<a id="contain-content" class="anchor" href="#contain-content" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>contain: content</h2>
+
+<ul>
+<li>Equivalent to <code>contain: layout paint style</code>
+</li>
+<li>This is the one which you should use in most cases, because its not as limiting as <code>contain: strict</code>
+</li>
+</ul>
 
 <p>If you find any mistake in the above explanation or demo, feel free to <a href="https://github.com/termvader/css-contain/issues/new">raise an issue</a> or <a href="https://github.com/termvader/css-contain">fork &amp; suggest changes</a></p>
 
