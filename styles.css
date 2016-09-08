@@ -1,0 +1,29 @@
+.parent-div, .child-div, .dummy-div {
+  border-radius: 0.3rem;
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.parent-div {
+  border: 1px solid #159957;
+  color: #159957;
+  min-height: 500px;
+}
+
+.child-div {
+  background: #1e6bb8;
+  color: #fff;
+  max-width: 300px;
+}
+.child-div.modified {
+  font-size: 40px;
+}
+
+.dummy-div {
+  border: 1px solid #819198;
+  color: #819198;
+}
+
+.layout-example .parent-div {
+  contain: strict;
+}
