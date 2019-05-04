@@ -47,13 +47,13 @@ There are three divs: `.parent-div`, `.child-div` & `.unaffected-div`. The `.chi
 
 
 ## contain: strict
-- Equivalent to `contain: layout paint size style`
+- Equivalent to `contain: layout paint size`
 - So its a shorthand combination of all four values given above.
 - Highest Containment Optimization if dimensions are set.
 
 
 ## contain: content
-- Equivalent to `contain: layout paint style`
+- Equivalent to `contain: layout paint`
 - This is the one which you should use in most cases, because its not as limiting as `contain: strict`
 
 
